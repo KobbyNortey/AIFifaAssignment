@@ -11,9 +11,11 @@ scaler = joblib.load("models/scaler.pkl")
 imputer = joblib.load("models/imputer.pkl")
 selected_features = joblib.load("models/selected_features.pkl")
 
+
 @app.route('/')
 def home():
     return render_template('index.html', selected_features=selected_features)
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -33,6 +35,7 @@ def predict():
     prediction = model.predict(input_scaled)
 
     return render_template('index.html', prediction=prediction[0], selected_features=selected_features)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
