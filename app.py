@@ -5,7 +5,6 @@ import joblib
 
 app = Flask(__name__)
 
-# Load pre-trained model and other necessary components
 model = joblib.load("models/knn_model.pkl")
 scaler = joblib.load("models/scaler.pkl")
 imputer = joblib.load("models/imputer.pkl")
@@ -22,16 +21,10 @@ def predict():
     data = request.form.to_dict()
     input_data = [data.get(feature, np.nan) for feature in selected_features]
 
-    # Convert input data to DataFrame
     input_df = pd.DataFrame([input_data], columns=selected_features)
-
-    # Impute missing values
     input_filled = pd.DataFrame(imputer.transform(input_df), columns=input_df.columns)
-
-    # Scale the data
     input_scaled = scaler.transform(input_filled)
 
-    # Make predictions
     prediction = model.predict(input_scaled)
 
     return render_template('index.html', prediction=prediction[0], selected_features=selected_features)
