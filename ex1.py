@@ -13,10 +13,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
 
 # Load FIFA 22 dataset
-fifa_22 = pd.read_csv("players_22.csv", low_memory=False, dtype={25: str, 108: str})
+fifa_22 = pd.read_csv("Data/players_22.csv", low_memory=False, dtype={25: str, 108: str})
 
 # Load male players dataset
-male_players = pd.read_csv("males_legacy.csv", low_memory=False, dtype={108: str})
+male_players = pd.read_csv("Data/males_legacy.csv", low_memory=False, dtype={108: str})
 
 # Select only numerical columns
 numeric_cols = male_players.select_dtypes(include=[np.number]).columns
@@ -123,7 +123,7 @@ print("Test RMSE:", rmse_test)
 best_model = grid_search.best_estimator_
 
 # Save the model and preprocessing objects
-joblib.dump(best_model, "knn_model.pkl")
-joblib.dump(scaler, "scaler.pkl")
-joblib.dump(imputer, "imputer.pkl")
-joblib.dump(selected_features, "selected_features.pkl")
+joblib.dump(best_model, "models/knn_model.pkl")
+joblib.dump(scaler, "models/scaler.pkl")
+joblib.dump(imputer, "models/imputer.pkl")
+joblib.dump(selected_features, "models/selected_features.pkl")

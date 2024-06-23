@@ -37,7 +37,7 @@ input {
 }
 
 button {
-    background-color: #ff0000;
+    background-color: #007bff;
     color: #fff;
     border: none;
     padding: 10px;
@@ -46,5 +46,11 @@ button {
 }
 
 button:hover {
-    background-color: #b30000;
+    background-color: #0056b3;
+}
+
+#prediction-result {
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #007bff;
 }

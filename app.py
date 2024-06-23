@@ -1,29 +1,27 @@
 from flask import Flask, request, render_template, jsonify
 import pandas as pd
+import numpy as np
 import joblib
 
 app = Flask(__name__)
 
 # Load pre-trained model and other necessary components
-model = joblib.load("knn_model.pkl")
-scaler = joblib.load("scaler.pkl")
-imputer = joblib.load("imputer.pkl")
-selected_features = joblib.load("selected_features.pkl")
-
+model = joblib.load("models/knn_model.pkl")
+scaler = joblib.load("models/scaler.pkl")
+imputer = joblib.load("models/imputer.pkl")
+selected_features = joblib.load("models/selected_features.pkl")
 
 @app.route('/')
 def home():
-    return render_template('index.html')
-
+    return render_template('index.html', selected_features=selected_features)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.json
-    # Convert input data to DataFrame
-    input_df = pd.DataFrame([data])
+    data = request.form.to_dict()
+    input_data = [data.get(feature, np.nan) for feature in selected_features]
 
-    # Align the columns to match the training data
-    input_df = input_df[selected_features].copy()
+    # Convert input data to DataFrame
+    input_df = pd.DataFrame([input_data], columns=selected_features)
 
     # Impute missing values
     input_filled = pd.DataFrame(imputer.transform(input_df), columns=input_df.columns)
@@ -34,8 +32,7 @@ def predict():
     # Make predictions
     prediction = model.predict(input_scaled)
 
-    return jsonify({'prediction': prediction.tolist()})
-
+    return render_template('index.html', prediction=prediction[0], selected_features=selected_features)
 
 if __name__ == "__main__":
     app.run(debug=True)
