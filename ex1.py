@@ -1,15 +1,16 @@
-import pandas as pd
+import joblib
 import numpy as np
-from sklearn.preprocessing import StandardScaler
-from sklearn.impute import SimpleImputer
-from sklearn.feature_selection import SelectKBest, f_regression
+import pandas as pd
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.neighbors import KNeighborsRegressor
+from sklearn.feature_selection import SelectKBest, f_regression
+from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
-from sklearn.svm import SVR
-from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVR
 
 # Load FIFA 22 dataset
 fifa_22 = pd.read_csv("players_22.csv", low_memory=False, dtype={25: str, 108: str})
@@ -19,6 +20,10 @@ male_players = pd.read_csv("males_legacy.csv", low_memory=False, dtype={108: str
 
 # Select only numerical columns
 numeric_cols = male_players.select_dtypes(include=[np.number]).columns
+
+# Drop columns that are not present in both datasets
+drop_cols = ['club_contract_valid_until_year', 'fifa_update', 'fifa_version', 'league_id']
+numeric_cols = numeric_cols.difference(drop_cols)
 
 # Impute missing values in numerical columns
 imputer = SimpleImputer(strategy='median')
@@ -102,12 +107,23 @@ fifa_22_filled = pd.DataFrame(imputer.transform(fifa_22_aligned), columns=fifa_2
 
 # Select only the 13 features used in training
 X_test = fifa_22_filled[selected_features]
-y_test = fifa_22_filled['overall']
+
+# Scale the test data
+X_test_scaled = scaler.transform(X_test)
 
 # Make predictions using the best KNN model
-y_pred_test = best_model.predict(X_test)
+y_pred_test = best_model.predict(X_test_scaled)
 
 # Calculate RMSE
-rmse_test = np.sqrt(mean_squared_error(y_test, y_pred_test))
+rmse_test = np.sqrt(mean_squared_error(fifa_22_filled['overall'], y_pred_test))
 
 print("Test RMSE:", rmse_test)
+
+
+best_model = grid_search.best_estimator_
+
+# Save the model and preprocessing objects
+joblib.dump(best_model, "knn_model.pkl")
+joblib.dump(scaler, "scaler.pkl")
+joblib.dump(imputer, "imputer.pkl")
+joblib.dump(selected_features, "selected_features.pkl")
